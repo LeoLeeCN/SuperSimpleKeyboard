@@ -5,6 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentBottom="true"
-    android:keyTextSize="43sp"
-    android:labelTextSize="30sp"
+    android:keyTextSize="20sp"
+    android:labelTextSize="14sp"
     />
