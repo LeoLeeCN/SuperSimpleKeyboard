@@ -45,15 +45,15 @@
             android:keyLabel="Back" />
     </Row>
     <Row android:rowEdgeFlags="bottom">
-        <Key android:keyWidth="20.000004%p" android:codes="-2"
-            android:keyLabel="12#" />
+        <Key android:keyWidth="20.000004%p" android:codes="1001"
+            android:keyLabel="Search" />
         <Key android:keyWidth="14.999998%p" android:codes="44"
             android:keyLabel="," />
         <Key android:keyWidth="29.999996%p" android:codes="32"
             android:isRepeatable="true" android:keyLabel="space" />
         <Key android:keyWidth="14.999998%p" android:codes="46"
             android:keyLabel="." />
-        <Key android:keyWidth="20.000004%p" android:codes="-3"
+        <Key android:keyWidth="20.000004%p" android:codes="-4"
             android:keyEdgeFlags="right" android:keyLabel="Done" />
     </Row>
 </Keyboard>

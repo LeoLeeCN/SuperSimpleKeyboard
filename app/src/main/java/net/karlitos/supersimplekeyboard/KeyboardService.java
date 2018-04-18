@@ -3,6 +3,7 @@ package net.karlitos.supersimplekeyboard;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
@@ -11,11 +12,14 @@ import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
 import java.util.List;
 
@@ -39,10 +43,20 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
     private boolean isCharKeyboard = false; //Start the keyboard with letter-layout
     InputMethodManager imm;
 
+    ActionBroadcastReceiver mReciever = new ActionBroadcastReceiver();
+
+    Toolbar mToolbar;
+
     @SuppressLint("InflateParams")
     @Override
     public View onCreateInputView()
     {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.microsoft.emmx.images");
+        registerReceiver(mReciever,intentFilter);
+
+        setCandidatesViewShown(true);
+
         imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         // SharedPreferences prefs = getSharedPreferences("ime_preferences", MODE_PRIVATE);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -73,9 +87,13 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
     @Override
     public void onKey(int primaryKeyCode, int[] ints)
     {
+        setCandidatesViewShown(true);
         InputConnection inputConnection = getCurrentInputConnection(); //Retrieve the currently active InputConnection that is bound to the input method
         switch (primaryKeyCode)
         {
+            case 1001: //Enter key pressed
+                CustomTabHelper.openCustomTab(getApplicationContext());
+                break;
             case Keyboard.KEYCODE_DONE: //Enter key pressed
                 inputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
                 break;
@@ -131,6 +149,10 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
                     {
                         keyCode = Character.toUpperCase(keyCode); // set keyValue to UpperCase
                     }
+                    if(mToolbar.searchBoxFocused()){
+                        mToolbar.appendText(String.valueOf(keyCode));
+                        return;
+                    }
                     inputConnection.commitText(String.valueOf(keyCode), 1); //Commit value from keyCode to the text box and set the cursor 1 position to the right
 
                     if (isCaps) //switch back the keyboard to the lowercase letter-layout
@@ -184,6 +206,13 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
         }
     }
 
+    @Override
+    public View onCreateCandidatesView() {
+        mToolbar=(Toolbar) View.inflate(getApplicationContext(),R.layout.toolbar, null);
+
+        return mToolbar;
+
+    }
 
 
     //region  Not implemented abstract methods
