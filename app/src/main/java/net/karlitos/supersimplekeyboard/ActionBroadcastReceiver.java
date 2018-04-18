@@ -17,9 +17,17 @@ package net.karlitos.supersimplekeyboard;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
+import android.support.v4.content.FileProvider;
+
+import static android.provider.UserDictionary.AUTHORITY;
 
 /**
  * A BroadcastReceiver that handles the Action Intent from the Custom Tab and shows the Url
@@ -31,7 +39,25 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         List<String> images = (List<String>)intent.getSerializableExtra("images");
         for (String path:images) {
-            Toast.makeText(context, "recieve image: "+path, Toast.LENGTH_SHORT).show();
+            File file = new File(path);
+            String filename = file.getName();
+            try {
+                Bitmap bitmap = BitmapFactory.decodeFile(path);
+                File cachePath = new File(context.getCacheDir(), "images");
+                cachePath.mkdirs(); // don't forget to make the directory
+                FileOutputStream stream = new FileOutputStream(cachePath + "/"+filename+"image.png"); // overwrites this image every time
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                stream.close();
+            }catch (Exception e){
+
+            }
+
+            File imagePath = new File(context.getCacheDir(), "images");
+            File newFile = new File(imagePath, filename+".png");
+
+            final Uri contentUri = FileProvider.getUriForFile(context, "net.karlitos.supersimplekeyboard", newFile);
+            ((KeyboardService)context).commitImage(contentUri,"test1234");
+            //Toast.makeText(context, "recieve image: "+path, Toast.LENGTH_SHORT).show();
         }
     }
 }

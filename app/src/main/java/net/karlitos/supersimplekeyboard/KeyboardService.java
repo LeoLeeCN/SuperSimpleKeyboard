@@ -2,26 +2,34 @@ package net.karlitos.supersimplekeyboard;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.ClipDescription;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Button;
 import android.widget.LinearLayout;
-
+import android.support.v4.content.FileProvider;
+import java.io.File;
 import java.util.List;
+
+import static android.provider.UserDictionary.AUTHORITY;
 
 /**
  * Created by Karel Macha 2015-2016
@@ -99,6 +107,10 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
                 break;
 
             case Keyboard.KEYCODE_DELETE: // BackSpace key pressed
+                if(mToolbar.searchBoxFocused()){
+                    mToolbar.deleteLast();
+                    return;
+                }
                 inputConnection.deleteSurroundingText(1, 0); //Delete 1 character of text before the current cursor position and 0 after the cursor position
                 break;
 
@@ -214,6 +226,26 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
 
     }
 
+    /**
+     * Commits a GIF image
+     *
+     * @param contentUri Content URI of the GIF image to be sent
+     * @param imageDescription Description of the GIF image to be sent
+     */
+    public void commitImage(Uri contentUri, String imageDescription) {
+        InputContentInfo inputContentInfo = new InputContentInfo(
+                contentUri,
+                new ClipDescription(imageDescription, new String[]{"image/png"}));
+
+        InputConnection inputConnection = getCurrentInputConnection();
+
+        EditorInfo editorInfo = getCurrentInputEditorInfo();
+        int flags = 0;
+        if (android.os.Build.VERSION.SDK_INT >= 25) {
+            flags |= inputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
+        }
+        inputConnection.commitContent(inputContentInfo, flags, null);
+    }
 
     //region  Not implemented abstract methods
     @Override

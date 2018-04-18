@@ -20,7 +20,11 @@ public class Toolbar extends LinearLayout {
     }
 
     public void appendText(String str){
-        mSearchBox.setText(mSearchBox.getText()+str);
+        mSearchBox.getText().append(str);
+    }
+
+    public void deleteLast(){
+        mSearchBox.getText().delete(mSearchBox.getText().length()-1,mSearchBox.getText().length());
     }
 
     @Override
