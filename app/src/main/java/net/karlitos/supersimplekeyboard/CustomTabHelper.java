@@ -29,13 +29,13 @@ public class CustomTabHelper {
         float density = dm.density;
         int width = dm.widthPixels;
         int height = dm.heightPixels;
-        int offset_y = (int)(height * 0.618);
+        int tabHeight = (int)(height * 0.618);
         //custom size
         intent.putExtra("custom_tab_dialog_style", true);
         intent.putExtra("custom_tab_size_width", width);
-        intent.putExtra("custom_tab_size_height", height - offset_y);
+        intent.putExtra("custom_tab_size_height", tabHeight);
         intent.putExtra("custom_tab_offset_x", 0);
-        intent.putExtra("custom_tab_offset_y", offset_y);
+        intent.putExtra("custom_tab_offset_y", height - tabHeight);
 
         //Bundle startAnimationBundle= ActivityOptionsCompat.makeCustomAnimation(context, R.anim.slide_in_right, R.anim.slide_out_left).toBundle();
         context.startActivity(intent);
