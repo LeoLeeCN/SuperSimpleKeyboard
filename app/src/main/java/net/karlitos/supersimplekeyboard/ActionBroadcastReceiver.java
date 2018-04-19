@@ -14,12 +14,16 @@ package net.karlitos.supersimplekeyboard;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -27,7 +31,8 @@ import java.io.FileOutputStream;
 import java.util.List;
 import android.support.v4.content.FileProvider;
 
-import static android.provider.UserDictionary.AUTHORITY;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.app.ActivityCompat;
 
 /**
  * A BroadcastReceiver that handles the Action Intent from the Custom Tab and shows the Url
@@ -37,28 +42,46 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        //requestPermission(context);
         List<String> images = (List<String>)intent.getSerializableExtra("images");
         for (String path:images) {
             File file = new File(path);
             String filename = file.getName();
             try {
-                Bitmap bitmap = BitmapFactory.decodeFile(path);
-                File cachePath = new File(context.getCacheDir(), "images");
-                cachePath.mkdirs(); // don't forget to make the directory
-                FileOutputStream stream = new FileOutputStream(cachePath + "/"+filename+"image.png"); // overwrites this image every time
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                Bitmap bitmap = BitmapFactory.decodeFile(new File(path).getAbsolutePath());
+                ((KeyboardService)context).showImage(bitmap,path);
+                File sharePath = new File(context.getFilesDir(), "images");
+                sharePath.mkdirs(); // don't forget to make the directory
+                FileOutputStream stream = new FileOutputStream(sharePath + "/"+filename); // overwrites this image every time
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 stream.close();
             }catch (Exception e){
-
+                Log.d("123",e.toString());
             }
 
-            File imagePath = new File(context.getCacheDir(), "images");
-            File newFile = new File(imagePath, filename+".png");
+            File imagePath = new File(context.getFilesDir(), "images");
+            File newFile = new File(imagePath, filename);
 
-            final Uri contentUri = FileProvider.getUriForFile(context, "net.karlitos.supersimplekeyboard", newFile);
-            ((KeyboardService)context).commitImage(contentUri,"test1234");
+            //final Uri contentUri = FileProvider.getUriForFile(context, "net.karlitos.supersimplekeyboard", newFile);
+            //((KeyboardService)context).commitImage(contentUri,"test1234");
             //Toast.makeText(context, "recieve image: "+path, Toast.LENGTH_SHORT).show();
         }
     }
+/*
+    private boolean requestPermission(Context context) {
+        //判断Android版本是否大于23
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int checkCallPhonePermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE);
+            if (checkCallPhonePermission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                return true;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+    */
 }
 

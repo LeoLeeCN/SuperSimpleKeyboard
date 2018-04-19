@@ -9,8 +9,8 @@ import android.support.v4.app.BundleCompat;
 
 public class CustomTabHelper {
 
-    public static void openCustomTab(Context context){
-        String url = "http://www.baidu.com";
+    public static void openCustomTab(Context context,String url){
+        //String url = "http://www.baidu.com";
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
         Bundle bundle = new Bundle();
@@ -27,7 +27,7 @@ public class CustomTabHelper {
                 intent.putExtra("custom_tab_size_width",1080);
                 intent.putExtra("custom_tab_size_height",1080);
                 intent.putExtra("custom_tab_offset_x",0);
-                intent.putExtra("custom_tab_offset_y",200);
+                intent.putExtra("custom_tab_offset_y",500);
 
         //Bundle startAnimationBundle= ActivityOptionsCompat.makeCustomAnimation(context, R.anim.slide_in_right, R.anim.slide_out_left).toBundle();
         context.startActivity(intent);

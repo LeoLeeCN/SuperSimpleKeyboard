@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
@@ -24,6 +25,8 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.support.v4.content.FileProvider;
 import java.io.File;
@@ -54,6 +57,7 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
     ActionBroadcastReceiver mReciever = new ActionBroadcastReceiver();
 
     Toolbar mToolbar;
+    CandidateImage mCandidateImage;
 
     @SuppressLint("InflateParams")
     @Override
@@ -100,7 +104,7 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
         switch (primaryKeyCode)
         {
             case 1001: //Enter key pressed
-                CustomTabHelper.openCustomTab(getApplicationContext());
+                CustomTabHelper.openCustomTab(getApplicationContext(),"https://www.bing.com/search?q=" + mToolbar.getText());
                 break;
             case Keyboard.KEYCODE_DONE: //Enter key pressed
                 inputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
@@ -245,6 +249,24 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
             flags |= inputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
         }
         inputConnection.commitContent(inputContentInfo, flags, null);
+    }
+
+    public void showImage(Bitmap bmp, final String path){
+        mCandidateImage=(CandidateImage) View.inflate(getApplicationContext(),R.layout.candidate_image, null);
+        mCandidateImage.setImage(bmp);
+        mCandidateImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showToolBar();
+                InputConnection inputConnection = getCurrentInputConnection();
+                inputConnection.commitText(path, 1);
+            }
+        });
+        setCandidatesView(mCandidateImage);
+    }
+
+    public void showToolBar(){
+        setCandidatesView(mToolbar);
     }
 
     //region  Not implemented abstract methods

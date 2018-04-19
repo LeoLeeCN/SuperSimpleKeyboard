@@ -24,9 +24,16 @@ public class Toolbar extends LinearLayout {
     }
 
     public void deleteLast(){
-        mSearchBox.getText().delete(mSearchBox.getText().length()-1,mSearchBox.getText().length());
+        try {
+            mSearchBox.getText().delete(mSearchBox.getText().length() - 1, mSearchBox.getText().length());
+        } catch (Exception e){
+
+        }
     }
 
+    public String getText(){
+        return mSearchBox.getText().toString();
+    }
     @Override
     protected void onFinishInflate(){
         super.onFinishInflate();
