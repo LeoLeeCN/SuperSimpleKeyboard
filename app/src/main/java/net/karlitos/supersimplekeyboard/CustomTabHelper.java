@@ -3,13 +3,16 @@ package net.karlitos.supersimplekeyboard;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.BundleCompat;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 public class CustomTabHelper {
 
-    public static void openCustomTab(Context context,String url){
+    public static void openCustomTab(Context context,String url) {
         //String url = "http://www.baidu.com";
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -19,15 +22,20 @@ public class CustomTabHelper {
         intent.setData(Uri.parse(url));
         intent.setPackage("com.microsoft.emmx.development");
         intent.putExtra("android.support.customtabs.extra.EXTRA_ENABLE_INSTANT_APPS", true);
-        intent.putExtra("microsoft.edge.tools.screenshot",true);
+        intent.putExtra("microsoft.edge.tools.screenshot", true);
 
-
-                //custom size
-                intent.putExtra("custom_tab_dialog_style",true);
-                intent.putExtra("custom_tab_size_width",1080);
-                intent.putExtra("custom_tab_size_height",1080);
-                intent.putExtra("custom_tab_offset_x",0);
-                intent.putExtra("custom_tab_offset_y",500);
+        Resources resources = context.getResources();
+        DisplayMetrics dm = resources.getDisplayMetrics();
+        float density = dm.density;
+        int width = dm.widthPixels;
+        int height = dm.heightPixels;
+        int offset_y = (int)(height * 0.618);
+        //custom size
+        intent.putExtra("custom_tab_dialog_style", true);
+        intent.putExtra("custom_tab_size_width", width);
+        intent.putExtra("custom_tab_size_height", height - offset_y);
+        intent.putExtra("custom_tab_offset_x", 0);
+        intent.putExtra("custom_tab_offset_y", offset_y);
 
         //Bundle startAnimationBundle= ActivityOptionsCompat.makeCustomAnimation(context, R.anim.slide_in_right, R.anim.slide_out_left).toBundle();
         context.startActivity(intent);

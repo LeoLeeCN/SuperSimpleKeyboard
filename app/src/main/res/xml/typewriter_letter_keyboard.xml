@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Keyboard android:keyWidth="10.000002%p" android:keyHeight="40dp"
-    android:horizontalGap="0.0px" android:verticalGap="0.0px"
+<Keyboard android:keyWidth="9.000002%p" android:keyHeight="40dp"
+    android:horizontalGap="1.000002%p" android:verticalGap="0.500002%p"
     xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Row>
+        <Key android:codes="49" android:keyLabel="1" android:keyEdgeFlags="left"/>
+        <Key android:codes="50" android:keyLabel="2"/>
+        <Key android:codes="51" android:keyLabel="3"/>
+        <Key android:codes="52" android:keyLabel="4"/>
+        <Key android:codes="53" android:keyLabel="5"/>
+        <Key android:codes="54" android:keyLabel="6"/>
+        <Key android:codes="55" android:keyLabel="7"/>
+        <Key android:codes="56" android:keyLabel="8"/>
+        <Key android:codes="57" android:keyLabel="9"/>
+        <Key android:codes="48" android:keyLabel="0" android:keyEdgeFlags="right"/>
+    </Row>
     <Row>
         <Key android:codes="113" android:keyEdgeFlags="left"
             android:keyLabel="q" />
@@ -47,11 +60,11 @@
     <Row android:rowEdgeFlags="bottom">
         <Key android:keyWidth="20.000004%p" android:codes="1001"
             android:keyLabel="Search" />
-        <Key android:keyWidth="14.999998%p" android:codes="44"
+        <Key android:keyWidth="8.999998%p" android:codes="44"
             android:keyLabel="," />
-        <Key android:keyWidth="29.999996%p" android:codes="32"
-            android:isRepeatable="true" android:keyLabel="space" />
-        <Key android:keyWidth="14.999998%p" android:codes="46"
+        <Key android:keyWidth="43.999996%p" android:codes="32"
+            android:isRepeatable="true" android:keyLabel="SwiftKey" />
+        <Key android:keyWidth="8.999998%p" android:codes="46"
             android:keyLabel="." />
         <Key android:keyWidth="20.000004%p" android:codes="-4"
             android:keyEdgeFlags="right" android:keyLabel="Done" />

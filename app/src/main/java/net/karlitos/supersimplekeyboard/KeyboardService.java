@@ -90,7 +90,6 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
         keyboardView.setKeyboard(defaultKeyboard);
         keyboardView.setOnKeyboardActionListener(this);
         keyboardView.setPreviewEnabled(false); //Disable the preview when key is long pressed
-
         defaultKeyboard.setShifted(true); // Start the keyboard in Caps-layout
         keyboardView.invalidateAllKeys(); // Requests a redraw of the entire keyboard
         return keyboardView;

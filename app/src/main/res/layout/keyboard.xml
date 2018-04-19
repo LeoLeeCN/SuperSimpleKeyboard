@@ -7,4 +7,9 @@
     android:layout_alignParentBottom="true"
     android:keyTextSize="20sp"
     android:labelTextSize="14sp"
+    android:keyPreviewLayout="@layout/key_preview"
+    android:background="@color/background_gray"
+    android:keyBackground="@drawable/key_background"
+    android:keyTextColor="@android:color/black"
+    android:shadowColor="@color/background_gray"
     />
