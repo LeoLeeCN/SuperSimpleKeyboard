@@ -47,18 +47,29 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
     public static final int ACTION_SHARE = 3;
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        if(intent == null)return;
-        int actionId = intent.getIntExtra(KEY_ACTION_SOURCE, -1);
-        if(actionId == ActionBroadcastReceiver.ACTION_SCREENSHOT) {
-            String path = intent.getStringExtra("imagePath");
-            Intent kintent = new Intent(context, KeyboardService.class);
-            kintent.putExtra("image",path);
-            context.startService(kintent);
-            return;
-        }else{
-            return;
-        }
+    public void onReceive(final Context context, final Intent intent) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                    if (intent == null) return;
+                    int actionId = intent.getIntExtra(KEY_ACTION_SOURCE, -1);
+                    if (actionId == ActionBroadcastReceiver.ACTION_SCREENSHOT) {
+                        String path = intent.getStringExtra("imagePath");
+                        Intent kintent = new Intent(context, KeyboardService.class);
+                        kintent.putExtra("image", path);
+                        context.startService(kintent);
+                        return;
+                    } else {
+                        return;
+                    }
+                }catch (Exception e){
+
+                }
+            }
+        }).start();
+
         //requestPermission(context);
         /*
         List<String> images = (List<String>)intent.getSerializableExtra("images");

@@ -275,7 +275,7 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
         String imagePath = intent.getStringExtra("image");
         if(imagePath!=null){
             try {
-                Bitmap bitmap = BitmapFactory.decodeFile(new File(imagePath).getAbsolutePath());
+                Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
                 showImage(bitmap,imagePath);
             }catch (Exception e){
                 Log.d("123",e.toString());
