@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import android.support.v4.content.FileProvider;
 
@@ -40,9 +41,26 @@ import android.support.v4.app.ActivityCompat;
  */
 public class ActionBroadcastReceiver extends BroadcastReceiver {
 
+    public static final String KEY_ACTION_SOURCE = "swiftkey.customtab.action";
+    public static final int ACTION_SCREENSHOT = 1;
+    public static final int ACTION_BACK = 2;
+    public static final int ACTION_SHARE = 3;
+
     @Override
     public void onReceive(Context context, Intent intent) {
+        if(intent == null)return;
+        int actionId = intent.getIntExtra(KEY_ACTION_SOURCE, -1);
+        if(actionId == ActionBroadcastReceiver.ACTION_SCREENSHOT) {
+            String path = intent.getStringExtra("imagePath");
+            Intent kintent = new Intent(context, KeyboardService.class);
+            kintent.putExtra("image",path);
+            context.startService(kintent);
+            return;
+        }else{
+            return;
+        }
         //requestPermission(context);
+        /*
         List<String> images = (List<String>)intent.getSerializableExtra("images");
         for (String path:images) {
             File file = new File(path);
@@ -64,8 +82,9 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
 
             //final Uri contentUri = FileProvider.getUriForFile(context, "net.karlitos.supersimplekeyboard", newFile);
             //((KeyboardService)context).commitImage(contentUri,"test1234");
-            //Toast.makeText(context, "recieve image: "+path, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "actionId:"+ actionId +" recieve image: "+path, Toast.LENGTH_SHORT).show();
         }
+        */
     }
 /*
     private boolean requestPermission(Context context) {

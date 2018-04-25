@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
@@ -15,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -266,6 +268,20 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
 
     public void showToolBar(){
         setCandidatesView(mToolbar);
+    }
+
+    @Override
+    public int onStartCommand(final Intent intent, int flags, int startId) {
+        String imagePath = intent.getStringExtra("image");
+        if(imagePath!=null){
+            try {
+                Bitmap bitmap = BitmapFactory.decodeFile(new File(imagePath).getAbsolutePath());
+                showImage(bitmap,imagePath);
+            }catch (Exception e){
+                Log.d("123",e.toString());
+            }
+        }
+        return super.onStartCommand(intent, flags, startId);
     }
 
     //region  Not implemented abstract methods
