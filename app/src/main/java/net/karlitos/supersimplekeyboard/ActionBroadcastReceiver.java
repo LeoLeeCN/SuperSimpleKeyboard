@@ -52,16 +52,17 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(2000);
                     if (intent == null) return;
                     int actionId = intent.getIntExtra(KEY_ACTION_SOURCE, -1);
                     if (actionId == ActionBroadcastReceiver.ACTION_SCREENSHOT) {
-                        String path = intent.getStringExtra("imagePath");
+                        Uri uri = (Uri)(intent.getParcelableExtra("imageUri"));
+                        //String path = intent.getStringExtra("imagePath");
                         Intent kintent = new Intent(context, KeyboardService.class);
-                        kintent.putExtra("image", path);
+                        kintent.putExtra("imageUri", uri);
                         context.startService(kintent);
                         return;
                     } else {
+                        String url = intent.getParcelableExtra("url");
                         return;
                     }
                 }catch (Exception e){

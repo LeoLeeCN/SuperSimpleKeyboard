@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.support.v4.content.FileProvider;
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 
 import static android.provider.UserDictionary.AUTHORITY;
@@ -105,7 +106,12 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
         switch (primaryKeyCode)
         {
             case 1001: //Enter key pressed
-                CustomTabHelper.openCustomTab(getApplicationContext(),"https://www.bing.com/search?q=" + mToolbar.getText());
+                String keyWords = mToolbar.getText();
+                if(keyWords==null || keyWords.equals("")) {
+                    CustomTabHelper.openCustomTab(getApplicationContext(),null,true);
+                }else {
+                    CustomTabHelper.openCustomTab(getApplicationContext(), "https://www.bing.com/search?q=" + mToolbar.getText(), false);
+                }
                 break;
             case Keyboard.KEYCODE_DONE: //Enter key pressed
                 inputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
@@ -272,11 +278,12 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        String imagePath = intent.getStringExtra("image");
-        if(imagePath!=null){
+        Uri uri = (Uri)(intent.getParcelableExtra("imageUri"));
+        if(uri!=null){
             try {
-                Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-                showImage(bitmap,imagePath);
+                InputStream image = getContentResolver().openInputStream(uri);
+                Bitmap bitmap = BitmapFactory.decodeStream(image);
+                showImage(bitmap,uri.toString());
             }catch (Exception e){
                 Log.d("123",e.toString());
             }
