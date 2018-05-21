@@ -26,4 +26,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:27.0.2'
     compile 'com.android.support:support-core-ui:27.0.2'
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support:customtabs:25.4.0'
 }

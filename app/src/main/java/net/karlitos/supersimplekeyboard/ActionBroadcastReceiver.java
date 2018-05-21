@@ -15,6 +15,7 @@ package net.karlitos.supersimplekeyboard;
 // limitations under the License.
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +24,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -30,6 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
 import android.support.v4.content.FileProvider;
 
 import android.support.v4.content.ContextCompat;
@@ -40,79 +44,46 @@ import android.support.v4.app.ActivityCompat;
  * in a Toast.
  */
 public class ActionBroadcastReceiver extends BroadcastReceiver {
-
-    public static final String KEY_ACTION_SOURCE = "swiftkey.customtab.action";
-    public static final int ACTION_SCREENSHOT = 1;
-    public static final int ACTION_BACK = 2;
-    public static final int ACTION_SHARE = 3;
-
     @Override
     public void onReceive(final Context context, final Intent intent) {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                if (intent == null) return;
                 try {
-                    if (intent == null) return;
-                    int actionId = intent.getIntExtra(KEY_ACTION_SOURCE, -1);
-                    if (actionId == ActionBroadcastReceiver.ACTION_SCREENSHOT) {
-                        Uri uri = (Uri)(intent.getParcelableExtra("imageUri"));
-                        //String path = intent.getStringExtra("imagePath");
-                        Intent kintent = new Intent(context, KeyboardService.class);
-                        kintent.putExtra("imageUri", uri);
-                        context.startService(kintent);
-                        return;
-                    } else {
-                        String url = intent.getParcelableExtra("url");
+                    int clickedId = intent.getIntExtra(CustomTabHelper.EXTRA_REMOTEVIEWS_CLICKED_ID, -1);
+                    if (clickedId!=-1) {
+                        if (clickedId == R.id.go_back) {
+                            CustomTabHelper.getInstance().sendCustomTabAction(CustomTabHelper.ACTION_BACK);
+                        } else if (clickedId == R.id.go_forward) {
+                            CustomTabHelper.getInstance().sendCustomTabAction(CustomTabHelper.ACTION_FORWARD);
+                        } else if (clickedId == R.id.share) {
+                            CustomTabHelper.getInstance().sendCustomTabAction(CustomTabHelper.ACTION_SHARE);
+                        } else if (clickedId == R.id.screenshot) {
+                            CustomTabHelper.getInstance().sendCustomTabAction(CustomTabHelper.ACTION_SCREENSHOT);
+                        }
                         return;
                     }
-                }catch (Exception e){
+
+                    String proactiveActionName = intent.getStringExtra(CustomTabHelper.ACTION_NAME);
+                    if(!TextUtils.isEmpty(proactiveActionName)) {
+                        if (proactiveActionName.equals(CustomTabHelper.ACTION_SCREENSHOT)) {
+                            CustomTabHelper.getInstance().sendCustomTabAction(CustomTabHelper.ACTION_HIDE);
+                            Uri uri = (Uri) (intent.getParcelableExtra("imageUri"));
+                            Intent kintent = new Intent(context, KeyboardService.class);
+                            kintent.putExtra("imageUri", uri);
+                            context.startService(kintent);
+                            return;
+                        } else if (proactiveActionName.equals( CustomTabHelper.ACTION_SHARE)) {
+                            String url = intent.getParcelableExtra("url");
+                            return;
+                        }
+                    }
+                } catch (Exception e) {
 
                 }
             }
         }).start();
-
-        //requestPermission(context);
-        /*
-        List<String> images = (List<String>)intent.getSerializableExtra("images");
-        for (String path:images) {
-            File file = new File(path);
-            String filename = file.getName();
-            try {
-                Bitmap bitmap = BitmapFactory.decodeFile(new File(path).getAbsolutePath());
-                ((KeyboardService)context).showImage(bitmap,path);
-                File sharePath = new File(context.getFilesDir(), "images");
-                sharePath.mkdirs(); // don't forget to make the directory
-                FileOutputStream stream = new FileOutputStream(sharePath + "/"+filename); // overwrites this image every time
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                stream.close();
-            }catch (Exception e){
-                Log.d("123",e.toString());
-            }
-
-            File imagePath = new File(context.getFilesDir(), "images");
-            File newFile = new File(imagePath, filename);
-
-            //final Uri contentUri = FileProvider.getUriForFile(context, "net.karlitos.supersimplekeyboard", newFile);
-            //((KeyboardService)context).commitImage(contentUri,"test1234");
-            Toast.makeText(context, "actionId:"+ actionId +" recieve image: "+path, Toast.LENGTH_SHORT).show();
-        }
-        */
     }
-/*
-    private boolean requestPermission(Context context) {
-        //判断Android版本是否大于23
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            int checkCallPhonePermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE);
-            if (checkCallPhonePermission != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-                return true;
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }
-    }
-    */
 }
 

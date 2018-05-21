@@ -9,11 +9,13 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Picture;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -32,6 +34,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.support.v4.content.FileProvider;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -62,10 +67,14 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
     Toolbar mToolbar;
     CandidateImage mCandidateImage;
 
+    CustomTabHelper mCustomTabHelper;
+
     @SuppressLint("InflateParams")
     @Override
     public View onCreateInputView()
     {
+        CustomTabHelper.getInstance().setContext(this.getApplicationContext());
+        mCustomTabHelper = CustomTabHelper.getInstance();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.microsoft.emmx.images");
         registerReceiver(mReciever,intentFilter);
@@ -108,9 +117,9 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
             case 1001: //Enter key pressed
                 String keyWords = mToolbar.getText();
                 if(keyWords==null || keyWords.equals("")) {
-                    CustomTabHelper.openCustomTab(getApplicationContext(),null,true);
+                    mCustomTabHelper.openCustomTabWithRemoteView(null,true);
                 }else {
-                    CustomTabHelper.openCustomTab(getApplicationContext(), "https://www.bing.com/search?q=" + mToolbar.getText(), false);
+                    mCustomTabHelper.openCustomTabWithRemoteView("https://www.bing.com/search?q=" + mToolbar.getText(), false);
                 }
                 break;
             case Keyboard.KEYCODE_DONE: //Enter key pressed
@@ -243,6 +252,7 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
      * @param contentUri Content URI of the GIF image to be sent
      * @param imageDescription Description of the GIF image to be sent
      */
+    /*
     public void commitImage(Uri contentUri, String imageDescription) {
         InputContentInfo inputContentInfo = new InputContentInfo(
                 contentUri,
@@ -257,16 +267,17 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
         }
         inputConnection.commitContent(inputContentInfo, flags, null);
     }
-
+*/
     public void showImage(Bitmap bmp, final String path){
         mCandidateImage=(CandidateImage) View.inflate(getApplicationContext(),R.layout.candidate_image, null);
         mCandidateImage.setImage(bmp);
+        final String commitPath = saveImage(bmp);
         mCandidateImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showToolBar();
                 InputConnection inputConnection = getCurrentInputConnection();
-                inputConnection.commitText(path, 1);
+                inputConnection.commitText(commitPath, 1);
             }
         });
         setCandidatesView(mCandidateImage);
@@ -289,6 +300,27 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
             }
         }
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    public static String saveImage(Bitmap bmp) {
+        File appDir = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_PICTURES);
+        if (!appDir.exists()) {
+            appDir.mkdir();
+        }
+        String fileName = System.currentTimeMillis() + ".jpg";
+        File file = new File(appDir, fileName);
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return file.getPath();
     }
 
     //region  Not implemented abstract methods
