@@ -76,12 +76,8 @@ public class CustomTabHelper {
             intent.putExtras(bundle);
             intent.setPackage("com.microsoft.emmx.development");
             intent.putExtra("android.support.customtabs.extra.EXTRA_ENABLE_INSTANT_APPS", true);
-            if (reopen) {
-                intent.putExtra(EXTRA_ACTION, "hide");
-                intent.setData(Uri.parse("http://"));
-            } else {
-                intent.setData(Uri.parse(url));
-            }
+
+            intent.setData(Uri.parse(url));
 
             Resources resources = mContext.getResources();
             DisplayMetrics dm = resources.getDisplayMetrics();
