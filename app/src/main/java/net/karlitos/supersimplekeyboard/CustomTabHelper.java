@@ -21,6 +21,9 @@ import android.util.Log;
 import android.view.WindowManager;
 import android.widget.RemoteViews;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CustomTabHelper {
 
     public static final String EXTRA_REMOTEVIEWS =
@@ -91,6 +94,18 @@ public class CustomTabHelper {
             intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_SIZE_HEIGHT", tabHeight);
             //intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_X", 0);
             intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_Y", (int)(height * 0.2));
+
+            intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_ADDRESS_EDITABLE", true);
+
+            ArrayList<String> showItems = new ArrayList<>();
+            showItems.add("add_to_readinglist");
+            showItems.add("download_page");
+            showItems.add("site_info");
+            showItems.add("row_menu");
+            showItems.add("request_desktop_site");
+            showItems.add("add_to_home_screen");
+            showItems.add("share");
+            intent.putStringArrayListExtra("com.microsoft.emmx.customtabs.overflow_menu.MENU_ITEM_SHOW", showItems);
 
             prepareBottombar(intent);
 
