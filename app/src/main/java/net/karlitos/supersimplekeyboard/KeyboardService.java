@@ -75,6 +75,7 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
     {
         CustomTabHelper.getInstance().setContext(this.getApplicationContext());
         mCustomTabHelper = CustomTabHelper.getInstance();
+        mCustomTabHelper.bindCustomTabsService();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.microsoft.emmx.images");
         registerReceiver(mReciever,intentFilter);
@@ -117,9 +118,9 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
             case 1001: //Enter key pressed
                 String keyWords = mToolbar.getText();
                 if(keyWords==null || keyWords.equals("")) {
-                    mCustomTabHelper.openCustomTabWithRemoteView(null,true);
+                    mCustomTabHelper.sendCustomTabActionSession(CustomTabHelper.ACTION_REOPEN,null);
                 }else {
-                    mCustomTabHelper.openCustomTabWithRemoteView("https://www.bing.com/search?q=" + mToolbar.getText(), false);
+                    mCustomTabHelper.openCustomTabWithRemoteViewSession("https://www.bing.com/search?q=" + mToolbar.getText());
                 }
                 break;
             case Keyboard.KEYCODE_DONE: //Enter key pressed
@@ -246,28 +247,6 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
 
     }
 
-    /**
-     * Commits a GIF image
-     *
-     * @param contentUri Content URI of the GIF image to be sent
-     * @param imageDescription Description of the GIF image to be sent
-     */
-    /*
-    public void commitImage(Uri contentUri, String imageDescription) {
-        InputContentInfo inputContentInfo = new InputContentInfo(
-                contentUri,
-                new ClipDescription(imageDescription, new String[]{"image/png"}));
-
-        InputConnection inputConnection = getCurrentInputConnection();
-
-        EditorInfo editorInfo = getCurrentInputEditorInfo();
-        int flags = 0;
-        if (android.os.Build.VERSION.SDK_INT >= 25) {
-            flags |= inputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
-        }
-        inputConnection.commitContent(inputContentInfo, flags, null);
-    }
-*/
     public void showImage(Bitmap bmp, final String path){
         mCandidateImage=(CandidateImage) View.inflate(getApplicationContext(),R.layout.candidate_image, null);
         mCandidateImage.setImage(bmp);

@@ -5,8 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsCallback;
@@ -14,17 +12,13 @@ import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
 import android.support.customtabs.CustomTabsSession;
-import android.support.v4.app.BundleCompat;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.RemoteViews;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class CustomTabHelper {
+public class CustomTabHelper implements ServiceConnectionCallback{
 
     public static final String EXTRA_REMOTEVIEWS =
             "android.support.customtabs.extra.EXTRA_REMOTEVIEWS";
@@ -50,11 +44,9 @@ public class CustomTabHelper {
 
     public static final String ACTION_NAME = "com.microsoft.emmx.customtabs.extra.ACTION_NAME";
 
-    /*
     private CustomTabsSession mCustomTabsSession;
     private CustomTabsClient mClient;
     private CustomTabsServiceConnection mConnection;
-*/
 
     private Context mContext;
 
@@ -69,50 +61,6 @@ public class CustomTabHelper {
         mContext = context.getApplicationContext();
     }
 
-    public void openCustomTabWithRemoteView(String url, boolean reopen){
-        if(reopen){
-            sendCustomTabAction(ACTION_REOPEN);
-        } else {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            Bundle bundle = new Bundle();
-            BundleCompat.putBinder(bundle, "android.support.customtabs.extra.SESSION", null);
-            intent.putExtras(bundle);
-            intent.setPackage("com.microsoft.emmx.development");
-            intent.putExtra("android.support.customtabs.extra.EXTRA_ENABLE_INSTANT_APPS", true);
-
-            intent.setData(Uri.parse(url));
-
-            Resources resources = mContext.getResources();
-            DisplayMetrics dm = resources.getDisplayMetrics();
-            float density = dm.density;
-            int width = dm.widthPixels;
-            int height = dm.heightPixels;
-            int tabHeight = (int)(height * 0.8);
-            //custom size
-            intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_DISPLAY_STYLE", "windowed");
-            //intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_SIZE_WIDTH", width);
-            intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_SIZE_HEIGHT", tabHeight);
-            //intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_X", 0);
-            intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_Y", (int)(height * 0.2));
-
-            intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_ADDRESS_EDITABLE", true);
-
-            ArrayList<String> showItems = new ArrayList<>();
-            showItems.add("add_to_readinglist");
-            showItems.add("download_page");
-            showItems.add("site_info");
-            showItems.add("row_menu");
-            showItems.add("request_desktop_site");
-            showItems.add("add_to_home_screen");
-            showItems.add("share");
-            intent.putStringArrayListExtra("com.microsoft.emmx.customtabs.overflow_menu.MENU_ITEM_SHOW", showItems);
-
-            prepareBottombar(intent);
-
-            mContext.startActivity(intent);
-        }
-    }
-
     public PendingIntent createPendingIntent() {
         Intent actionIntent = new Intent(
                 mContext.getApplicationContext(), ActionBroadcastReceiver.class);
@@ -120,24 +68,44 @@ public class CustomTabHelper {
                 mContext, 0, actionIntent, 0);
     }
 
-/*
-    public void openCustomTabWithRemoteViewSession(String url, boolean reopen){
-        if(reopen){
-            sendCustomTabActionSession(ACTION_REOPEN);
-        } else {
-            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(getSession());
-            CustomTabsIntent customTabsIntent = builder.build();
 
-            Intent intent = customTabsIntent.intent;
+    public void openCustomTabWithRemoteViewSession(String url) {
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(getSession());
+        CustomTabsIntent customTabsIntent = builder.build();
+        Intent intent = customTabsIntent.intent;
 
-            intent.setData(Uri.parse(url));
+        intent.setData(Uri.parse(url));
 
-            prepareBottombar( intent);
+        prepareBottombar(intent);
 
-            mContext.startActivity(intent);
-        }
+        Resources resources = mContext.getResources();
+        DisplayMetrics dm = resources.getDisplayMetrics();
+        float density = dm.density;
+        int width = dm.widthPixels;
+        int height = dm.heightPixels;
+        int tabHeight = (int) (height * 0.8);
+        //custom size
+        intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_DISPLAY_STYLE", "windowed");
+        //intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_SIZE_WIDTH", width);
+        intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_SIZE_HEIGHT", tabHeight);
+        //intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_X", 0);
+        intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_Y", (int) (height * 0.2));
+
+        intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_ADDRESS_EDITABLE", true);
+
+        ArrayList<String> showItems = new ArrayList<>();
+        showItems.add("add_to_readinglist");
+        showItems.add("download_page");
+        showItems.add("site_info");
+        showItems.add("row_menu");
+        showItems.add("request_desktop_site");
+        showItems.add("add_to_home_screen");
+        showItems.add("share");
+        intent.putStringArrayListExtra("com.microsoft.emmx.customtabs.overflow_menu.MENU_ITEM_SHOW", showItems);
+
+        mContext.startActivity(intent);
     }
-*/
+
     private void prepareBottombar(Intent intent) {
         intent.putExtra(EXTRA_REMOTEVIEWS, createRemoteViews(mContext, true));
         intent.putExtra(EXTRA_REMOTEVIEWS_VIEW_IDS, getClickableIDs());
@@ -158,46 +126,15 @@ public class CustomTabHelper {
         return PendingIntent.getBroadcast(context, 0, broadcastIntent, 0);
     }
 
-    public void sendCustomTabAction(String actionName){
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        Bundle bundle = new Bundle();
-        BundleCompat.putBinder(bundle, "android.support.customtabs.extra.SESSION", null);
-        intent.putExtras(bundle);
-        intent.setPackage("com.microsoft.emmx.development");
-        intent.putExtra("android.support.customtabs.extra.EXTRA_ENABLE_INSTANT_APPS", true);
-        intent.setData(Uri.parse("http://"));
-
-        Bundle actionBundle = new Bundle();
-        actionBundle.putString(CustomTabHelper.ACTION_NAME, actionName);
-        PendingIntent actionPendingIntent = createPendingIntent();
-        actionBundle.putParcelable("pendingIntent",actionPendingIntent);
-        intent.putExtra(CustomTabHelper.EXTRA_ACTION, actionBundle);
-
-        mContext.startActivity(intent);
-    }
-/*
-    public void sendCustomTabActionSession(String actionName){
-        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(getSession());
-        CustomTabsIntent customTabsIntent = builder.build();
-
-        Intent intent = customTabsIntent.intent;
-
-        intent.setData(Uri.parse("http://"));
-
-        Bundle actionBundle = new Bundle();
-        actionBundle.putString(CustomTabHelper.ACTION_NAME, actionName);
-        PendingIntent actionPendingIntent = createPendingIntent( actionName);
-        actionBundle.putParcelable("pendingIntent",actionPendingIntent);
-        intent.putExtra(CustomTabHelper.EXTRA_ACTION, actionBundle);
-
-        mContext.startActivity(intent);
+    public Bundle sendCustomTabActionSession(String actionName, Bundle bundle){
+        if(mClient!=null) {
+            return mClient.extraCommand(actionName, bundle);
+        } else {
+            bindCustomTabsService();
+            return null;
+        }
     }
 
-    public void sendAction(String action){
-        mCustomTabsSession.postMessage(action,null);
-    }
-    */
-/*
     public void bindCustomTabsService() {
         if (mClient != null) return;
 
@@ -213,19 +150,14 @@ public class CustomTabHelper {
     private CustomTabsSession getSession() {
         if (mClient == null) {
             mCustomTabsSession = null;
+            bindCustomTabsService();
         } else if (mCustomTabsSession == null) {
             mCustomTabsSession = mClient.newSession(new NavigationCallback());
         }
-
-        boolean getchannel = mCustomTabsSession.requestPostMessageChannel(Uri.parse("swiftkey"));
-        if(getchannel){
-            Log.d("test","get channel");
-        }
-
         return mCustomTabsSession;
     }
-*/
-/*
+
+
     @Override
     public void onServiceConnected(CustomTabsClient client) {
         mClient = client;
@@ -244,11 +176,9 @@ public class CustomTabHelper {
 
         @Override
         public void onMessageChannelReady(Bundle extras) {
-            CustomTabHelper.getInstance().sendAction("test");
         }
 
         @Override
         public void onPostMessage(String message, Bundle extras) {}
     }
-*/
 }
