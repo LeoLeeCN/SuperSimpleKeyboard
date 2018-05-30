@@ -14,30 +14,12 @@ package net.karlitos.supersimplekeyboard;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import android.Manifest;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
-import android.widget.Toast;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import android.support.v4.content.FileProvider;
-
-import android.support.v4.content.ContextCompat;
-import android.support.v4.app.ActivityCompat;
 
 /**
  * A BroadcastReceiver that handles the Action Intent from the Custom Tab and shows the Url
@@ -54,13 +36,17 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
                     int clickedId = intent.getIntExtra(CustomTabHelper.EXTRA_REMOTEVIEWS_CLICKED_ID, -1);
                     if (clickedId!=-1) {
                         if (clickedId == R.id.go_back) {
-                            CustomTabHelper.getInstance().sendCustomTabAction(CustomTabHelper.ACTION_BACK);
+                            CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_BACK, null);
                         } else if (clickedId == R.id.go_forward) {
-                            CustomTabHelper.getInstance().sendCustomTabAction(CustomTabHelper.ACTION_FORWARD);
+                            CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_FORWARD, null);
                         } else if (clickedId == R.id.share) {
-                            CustomTabHelper.getInstance().sendCustomTabAction(CustomTabHelper.ACTION_SHARE);
+                            Bundle result = CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_SHARE, null);
+                            String url = intent.getParcelableExtra("url");
+                            String title = intent.getParcelableExtra("title");
                         } else if (clickedId == R.id.screenshot) {
-                            CustomTabHelper.getInstance().sendCustomTabAction(CustomTabHelper.ACTION_SCREENSHOT);
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable("pendingIntent",CustomTabHelper.getInstance().createPendingIntent());
+                            CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_SCREENSHOT, bundle);
                         }
                         return;
                     }
@@ -68,14 +54,11 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
                     String proactiveActionName = intent.getStringExtra(CustomTabHelper.ACTION_NAME);
                     if(!TextUtils.isEmpty(proactiveActionName)) {
                         if (proactiveActionName.equals(CustomTabHelper.ACTION_SCREENSHOT)) {
-                            CustomTabHelper.getInstance().sendCustomTabAction(CustomTabHelper.ACTION_HIDE);
+                            CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_HIDE,null);
                             Uri uri = (Uri) (intent.getParcelableExtra("imageUri"));
                             Intent kintent = new Intent(context, KeyboardService.class);
                             kintent.putExtra("imageUri", uri);
                             context.startService(kintent);
-                            return;
-                        } else if (proactiveActionName.equals( CustomTabHelper.ACTION_SHARE)) {
-                            String url = intent.getParcelableExtra("url");
                             return;
                         }
                     }
