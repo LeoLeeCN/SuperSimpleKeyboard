@@ -71,27 +71,26 @@ public class CustomTabHelper implements ServiceConnectionCallback{
 
     public void openCustomTabWithRemoteViewSession(String url) {
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(getSession());
+        builder.setStartAnimations(mContext, R.anim.slide_in_right, R.anim.slide_out_left);
+        builder.setExitAnimations(mContext, R.anim.slide_in_left, R.anim.slide_out_right);
         CustomTabsIntent customTabsIntent = builder.build();
-        Intent intent = customTabsIntent.intent;
-
-        intent.setData(Uri.parse(url));
-
-        prepareBottombar(intent);
+        customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        prepareBottombar(customTabsIntent.intent);
 
         Resources resources = mContext.getResources();
         DisplayMetrics dm = resources.getDisplayMetrics();
         float density = dm.density;
-        int width = dm.widthPixels;
-        int height = dm.heightPixels;
-        int tabHeight = (int) (height * 0.8);
+        int width = (int)(dm.widthPixels/density);
+        int height = (int)(dm.heightPixels/density);
+        int tabHeight = (int) (height * 0.6);
         //custom size
-        intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_DISPLAY_STYLE", "windowed");
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_DISPLAY_STYLE", "windowed");
         //intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_SIZE_WIDTH", width);
-        intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_SIZE_HEIGHT", tabHeight);
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_SIZE_HEIGHT", tabHeight);
         //intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_X", 0);
-        intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_Y", (int) (height * 0.2));
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_Y", (int) (height * 0.4));
 
-        intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_ADDRESS_EDITABLE", true);
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_ADDRESS_EDITABLE", true);
 
         ArrayList<String> showItems = new ArrayList<>();
         showItems.add("add_to_readinglist");
@@ -101,12 +100,12 @@ public class CustomTabHelper implements ServiceConnectionCallback{
         showItems.add("request_desktop_site");
         showItems.add("add_to_home_screen");
         showItems.add("share");
-        intent.putStringArrayListExtra("com.microsoft.emmx.customtabs.overflow_menu.MENU_ITEM_SHOW", showItems);
+        customTabsIntent.intent.putStringArrayListExtra("com.microsoft.emmx.customtabs.overflow_menu.MENU_ITEM_SHOW", showItems);
 
-        mContext.startActivity(intent);
+        customTabsIntent.launchUrl(mContext,Uri.parse(url));
     }
 
-    private void prepareBottombar(Intent intent) {
+    private void  prepareBottombar(Intent intent) {
         intent.putExtra(EXTRA_REMOTEVIEWS, createRemoteViews(mContext, true));
         intent.putExtra(EXTRA_REMOTEVIEWS_VIEW_IDS, getClickableIDs());
         intent.putExtra(EXTRA_REMOTEVIEWS_PENDINGINTENT, getOnClickPendingIntent(mContext));
