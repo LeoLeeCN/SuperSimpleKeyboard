@@ -102,6 +102,8 @@ public class CustomTabHelper implements ServiceConnectionCallback{
         showItems.add("share");
         customTabsIntent.intent.putStringArrayListExtra("com.microsoft.emmx.customtabs.overflow_menu.MENU_ITEM_SHOW", showItems);
 
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.CLOSE_BUTTON.ACTION", "hide");
+
         customTabsIntent.launchUrl(mContext,Uri.parse(url));
     }
 
@@ -126,8 +128,8 @@ public class CustomTabHelper implements ServiceConnectionCallback{
     }
 
     public Bundle sendCustomTabActionSession(String actionName, Bundle bundle){
-        if(mClient!=null) {
-            return mClient.extraCommand(actionName, bundle);
+        if(getSession()!=null) {
+            return getSession().edgeExtraCommand(actionName, bundle);
         } else {
             bindCustomTabsService();
             return null;
@@ -160,6 +162,7 @@ public class CustomTabHelper implements ServiceConnectionCallback{
     @Override
     public void onServiceConnected(CustomTabsClient client) {
         mClient = client;
+        mCustomTabsSession = mClient.newSession(new NavigationCallback());
     }
 
     @Override

@@ -37,4 +37,5 @@ interface ICustomTabsService {
     boolean requestPostMessageChannel(in ICustomTabsCallback callback, in Uri postMessageOrigin) = 6;
     int postMessage(in ICustomTabsCallback callback, String message, in Bundle extras) = 7;
     boolean validateRelationship(in ICustomTabsCallback callback, int relation, in Uri origin, in Bundle extras) = 8;
+    Bundle edgeExtraCommand(in ICustomTabsCallback callback, String commandName, in Bundle args) = 9;
 }

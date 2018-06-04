@@ -161,7 +161,14 @@ public abstract class CustomTabsService extends Service {
             return CustomTabsService.this.validateRelationship(
                     new CustomTabsSessionToken(callback), relation, origin, extras);
         }
+
+        @Override
+        public Bundle edgeExtraCommand(ICustomTabsCallback callback, String commandName, Bundle args) throws RemoteException {
+            return CustomTabsService.this.edgeExtraCommand(new CustomTabsSessionToken(callback),commandName, args);
+        }
     };
+
+    protected abstract Bundle edgeExtraCommand(CustomTabsSessionToken customTabsSessionToken, String commandName, Bundle args);
 
     @Override
     public IBinder onBind(Intent intent) {

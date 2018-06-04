@@ -242,4 +242,12 @@ public final class CustomTabsSession {
     /* package */ ComponentName getComponentName() {
         return mComponentName;
     }
+
+    public Bundle edgeExtraCommand(String commandName, Bundle args) {
+        try {
+            return mService.edgeExtraCommand(mCallback, commandName, args);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
 }
