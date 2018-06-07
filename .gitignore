@@ -102,3 +102,5 @@ freeline/
 freeline_project_description.json
 
 Thumbs.db
+
+\.idea/caches/

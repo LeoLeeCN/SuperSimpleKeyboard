@@ -41,8 +41,8 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
                             CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_FORWARD, null);
                         } else if (clickedId == R.id.share) {
                             Bundle result = CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_SHARE, null);
-                            String url = intent.getParcelableExtra("url");
-                            String title = intent.getParcelableExtra("title");
+                            String url = result.getString("url");
+                            String title = result.getString("title");
                         } else if (clickedId == R.id.screenshot) {
                             Bundle bundle = new Bundle();
                             bundle.putParcelable("pendingIntent",CustomTabHelper.getInstance().createPendingIntent());

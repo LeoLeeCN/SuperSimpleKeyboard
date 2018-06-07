@@ -100,9 +100,12 @@ public class CustomTabHelper implements ServiceConnectionCallback{
         showItems.add("request_desktop_site");
         showItems.add("add_to_home_screen");
         showItems.add("share");
-        customTabsIntent.intent.putStringArrayListExtra("com.microsoft.emmx.customtabs.overflow_menu.MENU_ITEM_SHOW", showItems);
+        showItems.add("reload");
+        customTabsIntent.intent.putStringArrayListExtra("com.microsoft.emmx.customtabs.overflow_menu.MENU_ITEM_HIDE", showItems);
 
         customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.CLOSE_BUTTON.ACTION", "hide");
+
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.OPEN_INCOGNITO", true);
 
         customTabsIntent.launchUrl(mContext,Uri.parse(url));
     }
