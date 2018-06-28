@@ -99,13 +99,13 @@ public class CustomTabHelper implements ServiceConnectionCallback{
         showItems.add("row_menu");
         showItems.add("request_desktop_site");
         showItems.add("add_to_home_screen");
-        showItems.add("share");
+        //showItems.add("share");
         showItems.add("reload");
         customTabsIntent.intent.putStringArrayListExtra("com.microsoft.emmx.customtabs.overflow_menu.MENU_ITEM_HIDE", showItems);
 
         customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.CLOSE_BUTTON.ACTION", "hide");
 
-        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.OPEN_INCOGNITO", true);
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.OPEN_INCOGNITO", false);
 
         customTabsIntent.launchUrl(mContext,Uri.parse(url));
     }
@@ -171,6 +171,7 @@ public class CustomTabHelper implements ServiceConnectionCallback{
     @Override
     public void onServiceDisconnected() {
         mClient = null;
+        mCustomTabsSession = null;
     }
 
     private static class NavigationCallback extends CustomTabsCallback {

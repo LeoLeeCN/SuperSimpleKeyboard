@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "26.0.2"
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "net.karlitos.supersimplekeyboard"
         minSdkVersion 19
-        targetSdkVersion 27
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -20,11 +20,11 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-annotations:27.0.2'
-    compile 'com.android.support:support-v4:27.0.2'
-    compile 'com.android.support:appcompat-v7:27.0.2'
-    compile 'com.android.support:support-core-ui:27.0.2'
-    testCompile 'junit:junit:4.12'
-    compile project(':customtabs')
+    api fileTree(dir: 'libs', include: ['*.jar'])
+    api 'com.android.support:support-annotations:27.0.2'
+    api 'com.android.support:support-v4:27.0.2'
+    api 'com.android.support:appcompat-v7:27.0.2'
+    api 'com.android.support:support-core-ui:27.0.2'
+    api 'com.microsoft.emmx:customtabs:1.0.0'
+    testImplementation 'junit:junit:4.12'
 }

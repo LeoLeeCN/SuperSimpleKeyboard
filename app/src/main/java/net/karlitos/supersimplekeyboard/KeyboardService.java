@@ -120,7 +120,8 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
                 if(keyWords==null || keyWords.equals("")) {
                     mCustomTabHelper.sendCustomTabActionSession(CustomTabHelper.ACTION_REOPEN,null);
                 }else {
-                    mCustomTabHelper.openCustomTabWithRemoteViewSession("https://www.bing.com/search?q=" + mToolbar.getText());
+                    mCustomTabHelper.openCustomTabWithRemoteViewSession("http://www.baidu.com/s?wd=" + mToolbar.getText());
+                    //mCustomTabHelper.openCustomTabWithRemoteViewSession("https://www.bing.com/search?q=" + mToolbar.getText());
                 }
                 break;
             case Keyboard.KEYCODE_DONE: //Enter key pressed
@@ -269,6 +270,8 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
         Uri uri = (Uri)(intent.getParcelableExtra("imageUri"));
+        String title = intent.getStringExtra("title");
+        String url = intent.getStringExtra("url");
         if(uri!=null){
             try {
                 InputStream image = getContentResolver().openInputStream(uri);
@@ -277,6 +280,9 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
             }catch (Exception e){
                 Log.d("123",e.toString());
             }
+        } else if(title!=null && !title.isEmpty()){
+            InputConnection inputConnection = getCurrentInputConnection();
+            inputConnection.commitText(title + " : " + url, 1);
         }
         return super.onStartCommand(intent, flags, startId);
     }

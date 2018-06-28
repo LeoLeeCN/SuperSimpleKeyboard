@@ -43,6 +43,10 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
                             Bundle result = CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_SHARE, null);
                             String url = result.getString("url");
                             String title = result.getString("title");
+                            Intent kintent = new Intent(context, KeyboardService.class);
+                            kintent.putExtra("title", title);
+                            kintent.putExtra("url", url);
+                            context.startService(kintent);
                         } else if (clickedId == R.id.screenshot) {
                             Bundle bundle = new Bundle();
                             bundle.putParcelable("pendingIntent",CustomTabHelper.getInstance().createPendingIntent());
