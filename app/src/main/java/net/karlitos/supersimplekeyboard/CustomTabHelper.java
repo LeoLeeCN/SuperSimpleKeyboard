@@ -2,9 +2,15 @@ package net.karlitos.supersimplekeyboard;
 
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsCallback;
@@ -50,6 +56,8 @@ public class CustomTabHelper implements ServiceConnectionCallback{
 
     private Context mContext;
 
+    RemoteViews mRemoteViews;
+
     private static class CustomTabHelperHolder{
         static final CustomTabHelper INSTANCE = new CustomTabHelper();
     }
@@ -59,6 +67,18 @@ public class CustomTabHelper implements ServiceConnectionCallback{
     }
     public void setContext(Context context){
         mContext = context.getApplicationContext();
+        int t = edgeSupportsNewAPI(mContext);
+    }
+
+    int edgeSupportsNewAPI (Context context){
+        try {
+            ApplicationInfo ai = context.getPackageManager().getApplicationInfo("com.microsoft.emmx.development", PackageManager.GET_META_DATA);
+            Bundle bundle = ai.metaData;
+            return bundle.getInt("com.microsoft.emmx.customtab.version");
+        } catch (Exception e) {
+
+        }
+        return 0;
     }
 
     public PendingIntent createPendingIntent() {
@@ -68,8 +88,9 @@ public class CustomTabHelper implements ServiceConnectionCallback{
                 mContext, 0, actionIntent, 0);
     }
 
-
     public void openCustomTabWithRemoteViewSession(String url) {
+        if(getSession()==null)
+            return;
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(getSession());
         builder.setStartAnimations(mContext, R.anim.slide_in_right, R.anim.slide_out_left);
         builder.setExitAnimations(mContext, R.anim.slide_in_left, R.anim.slide_out_right);
@@ -85,12 +106,14 @@ public class CustomTabHelper implements ServiceConnectionCallback{
         int tabHeight = (int) (height * 0.6);
         //custom size
         customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_DISPLAY_STYLE", "windowed");
-        //intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_SIZE_WIDTH", width);
-        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_SIZE_HEIGHT", tabHeight);
-        //intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_X", 0);
-        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_Y", (int) (height * 0.4));
+        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_TOP", "10%");
+        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_BOTTOM", "20%");
+        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_START", "10%");
+        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_END", "20%");
+        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_DIM_AMOUNT", 0.5f);
 
         customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_ADDRESS_EDITABLE", true);
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.AUTO_HIDE_TOOLBAR", false);
 
         ArrayList<String> showItems = new ArrayList<>();
         showItems.add("add_to_readinglist");
@@ -117,8 +140,8 @@ public class CustomTabHelper implements ServiceConnectionCallback{
     }
 
     public RemoteViews createRemoteViews(Context context, boolean showPlayIcon) {
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.remote_view);
-        return remoteViews;
+        mRemoteViews = new RemoteViews(context.getPackageName(), R.layout.remote_view);
+        return mRemoteViews;
     }
 
     public int[] getClickableIDs() {
@@ -147,7 +170,18 @@ public class CustomTabHelper implements ServiceConnectionCallback{
         if (ok) {
 
         } else {
+            mConnection = null;
+            Intent intent = new Intent();
+            /*
+            intent.setAction("android.support.customtabs.action.CustomTabsService");
+            intent.setPackage("com.microsoft.emmx.development");
+            */
 
+            intent.setComponent(new ComponentName(
+                    "com.microsoft.emmx.development",
+                    "com.microsoft.emmx.development.org.chromium.chrome.browser.customtabs.CustomTabsConnectionService"));
+
+            mContext.startService(intent);
         }
     }
 
@@ -177,6 +211,8 @@ public class CustomTabHelper implements ServiceConnectionCallback{
     private static class NavigationCallback extends CustomTabsCallback {
         @Override
         public void onNavigationEvent(int navigationEvent, Bundle extras) {
+            boolean cangoback = extras.getBoolean("can_go_back");
+            boolean cangoforward = extras.getBoolean("can_go_forward");
             Log.w("test", "onNavigationEvent: Code = " + navigationEvent);
         }
 

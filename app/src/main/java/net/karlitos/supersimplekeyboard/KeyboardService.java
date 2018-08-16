@@ -18,6 +18,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v13.view.inputmethod.InputConnectionCompat;
+import android.support.v13.view.inputmethod.InputContentInfoCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -75,7 +77,7 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
     {
         CustomTabHelper.getInstance().setContext(this.getApplicationContext());
         mCustomTabHelper = CustomTabHelper.getInstance();
-        mCustomTabHelper.bindCustomTabsService();
+        //mCustomTabHelper.bindCustomTabsService();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.microsoft.emmx.images");
         registerReceiver(mReciever,intentFilter);
@@ -256,8 +258,21 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
             @Override
             public void onClick(View v) {
                 showToolBar();
-                InputConnection inputConnection = getCurrentInputConnection();
-                inputConnection.commitText(commitPath, 1);
+                //InputConnection inputConnection = getCurrentInputConnection();
+                //inputConnection.commitText(commitPath, 1);
+            }
+        });
+        setCandidatesView(mCandidateImage);
+    }
+
+    public void showImage(Bitmap bmp, final Uri uri){
+        mCandidateImage=(CandidateImage) View.inflate(getApplicationContext(),R.layout.candidate_image, null);
+        mCandidateImage.setImage(bmp);
+        mCandidateImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showToolBar();
+                commitImage(uri,"test for uri");
             }
         });
         setCandidatesView(mCandidateImage);
@@ -276,7 +291,8 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
             try {
                 InputStream image = getContentResolver().openInputStream(uri);
                 Bitmap bitmap = BitmapFactory.decodeStream(image);
-                showImage(bitmap,uri.toString());
+                //showImage(bitmap,uri.toString());
+                showImage(bitmap,uri);
             }catch (Exception e){
                 Log.d("123",e.toString());
             }
@@ -306,6 +322,20 @@ public class KeyboardService extends InputMethodService implements KeyboardView.
         }
 
         return file.getPath();
+    }
+
+    public void commitImage(Uri contentUri, String imageDescription) {
+        InputContentInfoCompat inputContentInfo = new InputContentInfoCompat(
+                contentUri,
+                new ClipDescription(imageDescription, new String[]{"image/jpeg"}),null);
+        InputConnection inputConnection = getCurrentInputConnection();
+        EditorInfo editorInfo = getCurrentInputEditorInfo();
+        int flags = 0;
+        if (android.os.Build.VERSION.SDK_INT >= 25) {
+            flags |= InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
+        }
+        InputConnectionCompat.commitContent(
+                inputConnection, editorInfo, inputContentInfo, flags, null);
     }
 
     //region  Not implemented abstract methods
