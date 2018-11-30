@@ -31,39 +31,60 @@ public class ActionBroadcastReceiver extends BroadcastReceiver {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Bundle tabstatus = intent.getBundleExtra("tab_status");
+                if(tabstatus!=null) {
+                    boolean cangoback = tabstatus.getBoolean("can_go_back");
+                    boolean cangoforward = tabstatus.getBoolean("can_go_forward");
+                    int navigationEvent = tabstatus.getInt("navigation_event");
+                    boolean ableToUpdateRemoteview = tabstatus.getBoolean("able_to_update_remoteview");
+                    if(ableToUpdateRemoteview)
+                        CustomTabHelper.getInstance().updateRemoteView(cangoback,cangoforward);
+                    return;
+                }
                 if (intent == null) return;
                 try {
                     int clickedId = intent.getIntExtra(CustomTabHelper.EXTRA_REMOTEVIEWS_CLICKED_ID, -1);
                     if (clickedId!=-1) {
                         if (clickedId == R.id.go_back) {
-                            CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_BACK, null);
+                            //CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_BACK, null);
+                            CustomTabHelper.getInstance().sendExtraCommand("goback");
                         } else if (clickedId == R.id.go_forward) {
                             CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_FORWARD, null);
+                            CustomTabHelper.getInstance().sendExtraCommand("forward");
                         } else if (clickedId == R.id.share) {
-                            Bundle result = CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_SHARE, null);
-                            String url = result.getString("url");
-                            String title = result.getString("title");
-                            Intent kintent = new Intent(context, KeyboardService.class);
-                            kintent.putExtra("title", title);
-                            kintent.putExtra("url", url);
-                            context.startService(kintent);
+                            //Bundle result = CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_SHARE, null);
+                            CustomTabHelper.getInstance().sendExtraCommand("get_siteinfo");
                         } else if (clickedId == R.id.screenshot) {
-                            Bundle bundle = new Bundle();
-                            bundle.putParcelable("pendingIntent",CustomTabHelper.getInstance().createPendingIntent());
-                            CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_SCREENSHOT, bundle);
+                            //Bundle bundle = new Bundle();
+                            //bundle.putParcelable("pendingIntent",CustomTabHelper.getInstance().createPendingIntent());
+                            //CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_SCREENSHOT, bundle);
+                            CustomTabHelper.getInstance().sendExtraCommand("screenshot");
                         }
                         return;
                     }
 
-                    String proactiveActionName = intent.getStringExtra(CustomTabHelper.ACTION_NAME);
+                    String proactiveActionName = intent.getStringExtra("command_name");
                     if(!TextUtils.isEmpty(proactiveActionName)) {
+                        CustomTabHelper.getInstance().sendExtraCommand("close");
                         if (proactiveActionName.equals(CustomTabHelper.ACTION_SCREENSHOT)) {
-                            CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_HIDE,null);
+                            Bundle bundle = intent.getBundleExtra("siteinfo");
+                            String url = bundle.getString("url");
+                            String title = bundle.getString("title");
+                            //CustomTabHelper.getInstance().sendCustomTabActionSession(CustomTabHelper.ACTION_HIDE,null);
                             Uri uri = (Uri) (intent.getParcelableExtra("imageUri"));
                             Intent kintent = new Intent(context, KeyboardService.class);
                             kintent.putExtra("imageUri", uri);
                             context.startService(kintent);
                             return;
+                        } else if (proactiveActionName.equals("get_siteinfo")) {
+                            Bundle bundle = intent.getBundleExtra("siteinfo");
+                            String url = bundle.getString("url");
+                            String title = bundle.getString("title");
+
+                            Intent kintent = new Intent(context, KeyboardService.class);
+                            kintent.putExtra("title", title);
+                            kintent.putExtra("url", url);
+                            context.startService(kintent);
                         }
                     }
                 } catch (Exception e) {

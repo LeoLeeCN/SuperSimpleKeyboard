@@ -2,7 +2,6 @@ package net.karlitos.supersimplekeyboard;
 
 
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -10,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +18,7 @@ import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
 import android.support.customtabs.CustomTabsSession;
+import android.support.v4.app.BundleCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -89,12 +90,13 @@ public class CustomTabHelper implements ServiceConnectionCallback{
     }
 
     public void openCustomTabWithRemoteViewSession(String url) {
-        if(getSession()==null)
-            return;
-        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(getSession());
-        builder.setStartAnimations(mContext, R.anim.slide_in_right, R.anim.slide_out_left);
-        builder.setExitAnimations(mContext, R.anim.slide_in_left, R.anim.slide_out_right);
+        //if(getSession()==null)
+        //    return;
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(null);
+        //builder.setStartAnimations(mContext, R.anim.slide_in_right, R.anim.slide_out_left);
+        //builder.setExitAnimations(mContext, R.anim.slide_in_left, R.anim.slide_out_right);
         CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.intent.setPackage("com.microsoft.emmx.selfhost");
         customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         prepareBottombar(customTabsIntent.intent);
 
@@ -105,14 +107,23 @@ public class CustomTabHelper implements ServiceConnectionCallback{
         int height = (int)(dm.heightPixels/density);
         int tabHeight = (int) (height * 0.6);
         //custom size
-        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_DISPLAY_STYLE", "windowed");
-        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_TOP", "10%");
-        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_BOTTOM", "20%");
-        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_START", "10%");
-        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_OFFSET_END", "20%");
-        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_DIM_AMOUNT", 0.5f);
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.DISPLAY_STYLE", "windowed");
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.OFFSET_TOP", "300dp");
+        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.OFFSET_BOTTOM", "20%");
+        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.OFFSET_START", "10%");
+        //customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.OFFSET_END", "20%");
 
-        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.EXTRA_ADDRESS_EDITABLE", true);
+        Bundle landScape = new Bundle();
+        landScape.putString("com.microsoft.emmx.customtabs.DISPLAY_STYLE", "windowed");
+        landScape.putString("com.microsoft.emmx.customtabs.OFFSET_TOP", "100dp");
+        landScape.putString("com.microsoft.emmx.customtabs.OFFSET_BOTTOM", "20%");
+        landScape.putString("com.microsoft.emmx.customtabs.OFFSET_START", "100dp");
+        landScape.putString("com.microsoft.emmx.customtabs.OFFSET_END", "20%");
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.OFFSET_LANDSCAPE", landScape);
+
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.DIM_AMOUNT", 0.5f);
+
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.ADDRESS_EDITABLE", true);
         customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.AUTO_HIDE_TOOLBAR", false);
 
         ArrayList<String> showItems = new ArrayList<>();
@@ -124,19 +135,70 @@ public class CustomTabHelper implements ServiceConnectionCallback{
         showItems.add("add_to_home_screen");
         //showItems.add("share");
         showItems.add("reload");
+
+        ArrayList<String> hideItems = new ArrayList<>();
+        hideItems.add("go_forward");
         customTabsIntent.intent.putStringArrayListExtra("com.microsoft.emmx.customtabs.overflow_menu.MENU_ITEM_HIDE", showItems);
 
         customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.CLOSE_BUTTON.ACTION", "hide");
 
         customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.OPEN_INCOGNITO", false);
 
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.PENDING_INTENT",getOnClickPendingIntent(mContext));
+
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.HOST_APP_PACKAGE_NAME",mContext.getPackageName());
+
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.RECENT_TASK_DESCRIPTION", "test task description");
+        customTabsIntent.intent.putExtra("com.microsoft.emmx.customtabs.RECENT_TASK_ICON", BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_voice_search));
+
+        customTabsIntent.intent.putExtra("android.support.customtabs.extra.TOOLBAR_COLOR", Color.parseColor("#787878"));
         customTabsIntent.launchUrl(mContext,Uri.parse(url));
+    }
+
+    public void sendExtraCommand(String command){
+        String url = "http://";
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Bundle bundle = new Bundle();
+        BundleCompat.putBinder(bundle, "android.support.customtabs.extra.SESSION", null);
+        intent.putExtras(bundle);
+        intent.setData(Uri.parse(url));
+        intent.setPackage("com.microsoft.emmx.development");
+        //intent.putExtra("android.support.customtabs.extra.EXTRA_ENABLE_INSTANT_APPS", true);
+        intent.putExtra("com.microsoft.emmx.customtabs.COMMAND",command);
+
+        mContext.startActivity(intent);
     }
 
     private void  prepareBottombar(Intent intent) {
         intent.putExtra(EXTRA_REMOTEVIEWS, createRemoteViews(mContext, true));
         intent.putExtra(EXTRA_REMOTEVIEWS_VIEW_IDS, getClickableIDs());
         intent.putExtra(EXTRA_REMOTEVIEWS_PENDINGINTENT, getOnClickPendingIntent(mContext));
+    }
+
+    public void updateRemoteView(boolean leftenable, boolean rightenable){
+        String url = "http://";
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Bundle bundle = new Bundle();
+        BundleCompat.putBinder(bundle, "android.support.customtabs.extra.SESSION", null);
+        intent.putExtras(bundle);
+        intent.setData(Uri.parse(url));
+        intent.setPackage("com.microsoft.emmx.development");
+        //intent.putExtra("android.support.customtabs.extra.EXTRA_ENABLE_INSTANT_APPS", true);
+        intent.putExtra("com.microsoft.emmx.customtabs.COMMAND","update_remoteview");
+
+        Bundle data = new Bundle();
+        mRemoteViews = new RemoteViews(mContext.getPackageName(), R.layout.remote_view);
+        mRemoteViews.setImageViewResource(R.id.go_back,leftenable? R.drawable.left_enable:R.drawable.left_disable);
+        mRemoteViews.setImageViewResource(R.id.go_forward,rightenable? R.drawable.right_enable:R.drawable.right_disable);
+        data.putParcelable(EXTRA_REMOTEVIEWS, mRemoteViews);
+        data.putIntArray(EXTRA_REMOTEVIEWS_VIEW_IDS, getClickableIDs());
+        data.putParcelable(EXTRA_REMOTEVIEWS_PENDINGINTENT, getOnClickPendingIntent(mContext));
+        intent.putExtra("com.microsoft.emmx.customtabs.COMMAND_DATA", data);
+        intent.putExtras(bundle);
+
+        mContext.startActivity(intent);
     }
 
     public RemoteViews createRemoteViews(Context context, boolean showPlayIcon) {
@@ -157,7 +219,7 @@ public class CustomTabHelper implements ServiceConnectionCallback{
         if(getSession()!=null) {
             return getSession().edgeExtraCommand(actionName, bundle);
         } else {
-            bindCustomTabsService();
+            //bindCustomTabsService();
             return null;
         }
     }
@@ -171,24 +233,13 @@ public class CustomTabHelper implements ServiceConnectionCallback{
 
         } else {
             mConnection = null;
-            Intent intent = new Intent();
-            /*
-            intent.setAction("android.support.customtabs.action.CustomTabsService");
-            intent.setPackage("com.microsoft.emmx.development");
-            */
-
-            intent.setComponent(new ComponentName(
-                    "com.microsoft.emmx.development",
-                    "com.microsoft.emmx.development.org.chromium.chrome.browser.customtabs.CustomTabsConnectionService"));
-
-            mContext.startService(intent);
         }
     }
 
     private CustomTabsSession getSession() {
         if (mClient == null) {
             mCustomTabsSession = null;
-            bindCustomTabsService();
+            //bindCustomTabsService();
         } else if (mCustomTabsSession == null) {
             mCustomTabsSession = mClient.newSession(new NavigationCallback());
         }
@@ -208,7 +259,7 @@ public class CustomTabHelper implements ServiceConnectionCallback{
         mCustomTabsSession = null;
     }
 
-    private static class NavigationCallback extends CustomTabsCallback {
+    private class NavigationCallback extends CustomTabsCallback {
         @Override
         public void onNavigationEvent(int navigationEvent, Bundle extras) {
             boolean cangoback = extras.getBoolean("can_go_back");
